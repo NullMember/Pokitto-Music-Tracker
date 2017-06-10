@@ -160,7 +160,7 @@ void printSettings(){
 }
 
 void drawPointer(){
-    pok.display.drawBitmap(100, (settingPointer * fontH) + settingPointer, pointBitmap);
+    pok.display.drawBitmap(130, (settingPointer * fontH) + settingPointer, pointBitmap);
 }
 // following functions are not ready and not used
 void saveSong(){
