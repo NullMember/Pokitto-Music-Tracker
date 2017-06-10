@@ -196,7 +196,7 @@ void Tracker::drawLines(){ // draw lines in tracker mode
 void Tracker::drawPointer(){
     pok.display.setColor(2);
     if (mode == 0){
-        pok.display.drawRect(vLines[colPointer], (fontH + 1) * (screenPointer + 1), (6 * fontW) + 7, fontH + 1);
+        pok.display.drawRect(vLines[colPointer], (fontH + 1) * (screenPointer + 1), (9 * fontW) + 10, fontH + 1);
     }
     if (mode == 1){
         if (edit == 0){
