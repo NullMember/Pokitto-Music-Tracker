@@ -18,6 +18,21 @@ const char blockSeqChar[] = "Block sequence ";
 const char blockChar[] = "Block ";
 const char rowChar[] = " row ";
 const char unknownChar[] = "0.030000";
+const char waveChar[] = "Waveform=";
+const char volChar[] = "Volume=";
+const char pitchRateChar[] = "Pitch bend rate=";
+const char pitchMaxChar[] = "Pitch bend max=";
+const char vibChar[] = "Vibrato rate=";
+const char arpChar[] = "Arpeggio mode=";
+const char ADSRChar[] = "ADSR=";
+const char attackChar[] = "Attack=";
+const char decayChar[] = "Decay=";
+const char sustainChar[] = "Sustain=";
+const char releaseChar[] = "Release=";
+const char loopChar[] = "Loop=";
+const char echoChar[] = "Echo=";
+const char overdriveChar[] = "Overdrive=";
+const char drumChar[] = "Drum kick=";
 
 const uint8_t pauseBitmap[] = {8, 5,
 0b00010100,0b00010100,

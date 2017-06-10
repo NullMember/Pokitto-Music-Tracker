@@ -16,6 +16,8 @@ struct Tracker{
         int8_t _pitch[30][64];
         int8_t _songPos[10][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
         bool t1Mute = 0, t2Mute = 0, t3Mute = 0;
+        char intToChar(int _int, uint8_t digit);
+        uint8_t digitLength(int _int);
     public:
         bool play = 0, stop = 0;
         void checkButtons();
@@ -28,6 +30,12 @@ struct Tracker{
         void playTracker();
         int16_t getBPM();
         int minMax(int _val, int _min, int _max);
+        void saveSong();
+        void filePutInt(int _int);
+        void filePrint(const char *_string, uint8_t _size);
+        void filePrint(char *_string, uint8_t _size);
+        void NL();
+        int8_t getLP(){ return lastPattern; }
 };
 
 int16_t Tracker::getBPM(){
@@ -366,4 +374,84 @@ int Tracker::minMax(int _val, int _min, int _max){
     if (_val < _min) return _max;
     else if (_val > _max) return _min;
     else return _val;
+}
+
+// following functions are not ready and not used
+void Tracker::saveSong(){
+    fileOpen("SavedSong.rbs", FILE_MODE_READWRITE);
+    filePrint(rboyChar, sizeof(rboyChar));
+    filePrint(unknownChar, sizeof(unknownChar));
+    NL();
+    filePrint(BPMChar, sizeof(BPMChar));
+    filePutInt(bpm);
+    NL();
+    filePrint(lastPatternChar, sizeof(lastPatternChar));
+    filePutChar(lastPattern + '0');
+    NL();
+    filePrint(loopToChar, sizeof(loopToChar));
+    filePutChar(loopTo + '0');
+    NL();
+    filePrint(patchesChar, sizeof(patchesChar));
+    filePutChar('1');
+    filePutChar('4');
+    NL();
+    for(uint8_t j = 0; j < lastPattern + 1; j++){
+        filePrint(blockSeqChar, sizeof(blockSeqChar));
+        filePutChar(j + '0'); filePutChar(' '); filePutChar(',');
+        filePutInt(_songPos[j][0]);
+        filePutChar(',');
+        filePutInt(_songPos[j][1]);
+        filePutChar(',');
+        filePutInt(_songPos[j][2]);
+        NL();
+    }
+    for (uint8_t k = 0; k < 30; k++){
+        for (uint8_t j = 0; j < 64; j++){
+            filePrint(blockChar, sizeof(blockChar));
+            filePutInt(k);
+            filePrint(rowChar, sizeof(rowChar));
+            filePutInt(j);
+            filePutChar(' '); filePutChar(',');
+            if(_pitch[k][j] == -1) filePutInt(255);
+            else filePutInt(_pitch[k][j]);
+            filePutChar(',');
+            if(_patch[k][j] == -1) filePutInt(0);
+            else filePutInt(_patch[k][j]);
+            NL();
+        }
+    }
+}
+
+char Tracker::intToChar(int _int, uint8_t digit){
+    return ((_int % int(pow(10, (digit + 1)))) / int(pow(10, digit)))  + '0';
+}
+
+uint8_t Tracker::digitLength(int _int){
+    for (uint8_t i = 9; i > 0; i--){
+        if((_int % int(pow(10, (i + 1))) / int(pow(10, i))) != 0) return i;
+    }
+}
+
+void Tracker::filePutInt(int _int){
+    uint8_t _size = digitLength(_int);
+    for(int8_t i = _size; i >= 0; i--){
+        filePutChar(intToChar(_int, i));
+    }
+}
+
+void Tracker::filePrint(const char *_string, uint8_t _size){
+    for(uint8_t i = 0; i < _size - 1; i++){
+        filePutChar(_string[i]);
+    }
+}
+
+void Tracker::filePrint(char * _string, uint8_t _size){
+    for(uint8_t i = 0; i < _size - 1; i++){
+        filePutChar(_string[i]);
+    }
+}
+
+void Tracker::NL(){
+    filePutChar(10);
+    //filePutChar(13);
 }

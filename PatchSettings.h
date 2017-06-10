@@ -21,9 +21,7 @@ struct Instrument instr[15];
 int8_t instrPointer = 0;
 int8_t settingPointer = 0;
 
-void saveSong();
-char intToChar(int _int, uint8_t digit);
-uint8_t digitLength(int _int);
+void saveInstrInSong();
 
 void changeValues(int8_t i){
     if (settingPointer == 9) instr[instrPointer].attack += i;
@@ -82,15 +80,15 @@ void checkButtons(){
             instr[instrPointer].arpMode = pok.menu(arpModes, 16);
             if (instr[instrPointer].arpMode == -1) instr[instrPointer].arpMode = old;
         }
-        /*else if(settingPointer == 16)
+        //else if(settingPointer == 16)
             //save instrument
-        else if(settingPointer == 17)
+        //else if(settingPointer == 17)
             //load instrument
         else if(settingPointer == 18)
-            //save song
-        else if(settingPointer == 19)
+            tracker.saveSong();
+            saveInstrInSong();
+        //else if(settingPointer == 19)
             //load song
-        */
     }
     else if(pok.buttons.pressed(BTN_C))
     {
@@ -162,30 +160,57 @@ void printSettings(){
 void drawPointer(){
     pok.display.drawBitmap(130, (settingPointer * fontH) + settingPointer, pointBitmap);
 }
-// following functions are not ready and not used
-void saveSong(){
-    fileOpen("SavedSong.rbs", FILE_MODE_READWRITE);
-    for(uint8_t i = 0; i < (sizeof(rboyChar) - 1); i++){
-        filePutChar(rboyChar[i]);
-    }
-    for(uint8_t i = 0; i < (sizeof(unknownChar) - 1); i++){
-        filePutChar(unknownChar[i]);
-    }
-    for(uint8_t i = 0; i < (sizeof(BPMChar) - 1); i++){
-        filePutChar(BPMChar[i]);
-    }
-    for(int8_t i = digitLength(tracker.getBPM()); i >= 0; i--){
-        filePutChar(intToChar(tracker.getBPM(), i));
+
+void saveInstrInSong(){
+    for (uint8_t j = 0; j < tracker.getLP() + 1; j++){
+        if (instr[j].name[0] == 0) tracker.filePutInt(j);
+        else tracker.filePrint(instr[j].name, sizeof(instr[j].name));
+        tracker.NL();
+        tracker.filePrint(waveChar, sizeof(waveChar));
+        tracker.filePutInt(instr[j].wave);
+        tracker.NL();
+        tracker.filePrint(volChar, sizeof(volChar));
+        tracker.filePutInt(instr[j].volume);
+        tracker.NL();
+        tracker.filePrint(pitchRateChar, sizeof(pitchRateChar));
+        tracker.filePutInt(instr[j].pitchRate);
+        tracker.NL();
+        tracker.filePrint(pitchMaxChar, sizeof(pitchMaxChar));
+        tracker.filePutInt(instr[j].pitchMax);
+        tracker.NL();
+        tracker.filePrint(vibChar, sizeof(vibChar));
+        tracker.filePutInt(0);
+        tracker.NL();
+        tracker.filePrint(arpChar, sizeof(arpChar));
+        tracker.filePutInt(instr[j].arpMode);
+        tracker.NL();
+        tracker.filePrint(ADSRChar, sizeof(ADSRChar));
+        tracker.filePutInt(instr[j].ADSR);
+        tracker.NL();
+        tracker.filePrint(attackChar, sizeof(attackChar));
+        tracker.filePutInt(instr[j].attack);
+        tracker.NL();
+        tracker.filePrint(decayChar, sizeof(decayChar));
+        tracker.filePutInt(instr[j].decay);
+        tracker.NL();
+        tracker.filePrint(sustainChar, sizeof(sustainChar));
+        tracker.filePutInt(instr[j].sustain);
+        tracker.NL();
+        tracker.filePrint(releaseChar, sizeof(releaseChar));
+        tracker.filePutInt(instr[j].release);
+        tracker.NL();
+        tracker.filePrint(loopChar, sizeof(loopChar));
+        tracker.filePutInt(instr[j].loop);
+        tracker.NL();
+        tracker.filePrint(echoChar, sizeof(echoChar));
+        tracker.filePutInt(instr[j].echo);
+        tracker.NL();
+        tracker.filePrint(overdriveChar, sizeof(overdriveChar));
+        tracker.filePutInt(instr[j].distort);
+        tracker.NL();
+        tracker.filePrint(drumChar, sizeof(drumChar));
+        tracker.filePutInt(instr[j].normalize);
+        tracker.NL();
     }
     fileClose();
-}
-
-char intToChar(int _int, uint8_t digit){
-    return ((_int % int(pow(10, (digit + 1)))) / int(pow(10, digit)))  + '0';
-}
-
-uint8_t digitLength(int _int){
-    for (uint8_t i = 9; i > 0; i--){
-        if((_int % int(pow(10, (i + 1))) / int(pow(10, i))) != 0) return i;
-    }
 }
