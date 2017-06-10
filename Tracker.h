@@ -10,15 +10,14 @@ struct Tracker{
         int8_t songPos = 0, lastPattern = 0, loopTo = 0;
         uint8_t mode = 0; //mode0 = travel mode, mode1 = edit pitches and patches, mode2 = screen1 settings, mode3 = play, pause, stop
         int8_t edit = 0;
-        uint8_t vLines[4] = {((fontW + 1) * 2) + 1, (((fontW + 1) * 6) + vLines[0]) + 1, (((fontW + 1) * 6) + vLines[1]) + 1, (((fontW + 1) * 6) + vLines[2]) + 1}; //(((fontW + 1) * number of chars) + left line) + 1
+        uint8_t vLines[4] = {((fontW + 1) * 2) + 1, (((fontW + 1) * 9) + vLines[0]) + 1, (((fontW + 1) * 9) + vLines[1]) + 1, (((fontW + 1) * 9) + vLines[2]) + 1}; //(((fontW + 1) * number of chars) + left line) + 1
         uint8_t s_vLines[2] = {vLines[3] + 2, 0};
         int8_t _patch[30][64];
         int8_t _pitch[30][64];
         int8_t _songPos[10][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
-
+        bool t1Mute = 0, t2Mute = 0, t3Mute = 0;
     public:
         bool play = 0, stop = 0;
-        bool t1Mute = 0, t2Mute = 0, t3Mute = 0;
         void checkButtons();
         void fillArrays();
         void drawLines();
@@ -79,9 +78,6 @@ void Tracker::checkButtons(){
     	}
     }
     else if (mode == 1){ // edit pitches and patches
-        if (pok.buttons.aBtn() && pok.buttons.bBtn()){
-            mode = 3;
-    	}
         if (pok.buttons.pressed(BTN_B)){
             mode = 0;
             edit = 0;
@@ -92,21 +88,18 @@ void Tracker::checkButtons(){
             edit = minMax(edit+1, 0, 1);
     	if (pok.buttons.repeat(BTN_UP, buttonRepeatFrame)){
             if (edit == 0)
-                _pitch[_songPos[songPos][colPointer]][rowPointer] = minMax(_pitch[_songPos[songPos][colPointer]][rowPointer]+1, 0, 119);
+                _pitch[_songPos[songPos][colPointer]][rowPointer] = minMax(_pitch[_songPos[songPos][colPointer]][rowPointer]+1, 0, 99);
             if (edit == 1)
                 _patch[_songPos[songPos][colPointer]][rowPointer] = minMax(_patch[_songPos[songPos][colPointer]][rowPointer]+1, 0, 14);
         }
         if (pok.buttons.repeat(BTN_DOWN, buttonRepeatFrame)){
             if (edit == 0)
-                _pitch[_songPos[songPos][colPointer]][rowPointer] = minMax(_pitch[_songPos[songPos][colPointer]][rowPointer]-1, 0, 119);
+                _pitch[_songPos[songPos][colPointer]][rowPointer] = minMax(_pitch[_songPos[songPos][colPointer]][rowPointer]-1, 0, 99);
             if (edit == 1)
                 _patch[_songPos[songPos][colPointer]][rowPointer] = minMax(_patch[_songPos[songPos][colPointer]][rowPointer]-1, 0, 14);
         }
     }
     else if(mode == 2){ // this screen settings
-        if (pok.buttons.aBtn() && pok.buttons.bBtn()){
-            mode = 3;
-    	}
         if (pok.buttons.pressed(BTN_C)){
             screen = 1;
             mode = 0;
@@ -193,11 +186,11 @@ void Tracker::drawLines(){ // draw lines in tracker mode
     pok.display.drawFastHLine(0, fontH + 1, vLines[3]);
     pok.display.setColor(1);
     pok.display.setCursor(vLines[0] + 1, 0);
-    pok.display.print("Track1");
+    pok.display.print("  Track 1");
     pok.display.setCursor(vLines[1] + 1, 0);
-    pok.display.print("Track2");
+    pok.display.print("  Track 2");
     pok.display.setCursor(vLines[2] + 1, 0);
-    pok.display.print("Track3");
+    pok.display.print("  Track 3");
 }
 
 void Tracker::drawPointer(){
@@ -223,14 +216,14 @@ void Tracker::drawPointer(){
 
 void Tracker::drawIsPlaying(){
     if (stop){
-        pok.display.drawBitmap(0, 0, stopBitmap);
+        pok.display.drawBitmap(2, 1, stopBitmap);
     }
     else{
         if (play){
-            pok.display.drawBitmap(0, 0, playBitmap);
+            pok.display.drawBitmap(2, 1, playBitmap);
         }
         else {
-            pok.display.drawBitmap(0, 0, pauseBitmap);
+            pok.display.drawBitmap(2, 1, pauseBitmap);
         }
     }
 }
@@ -243,41 +236,53 @@ void Tracker::printValues(){
         pok.display.setCursor(0, ((fontH + 1) * (counter + 1)) + 1);
         pok.display.print(screenMin + counter);
         pok.display.setCursor(vLines[0] + 2, ((fontH + 1) * (counter + 1)) + 1); // first col
-        if (_pitch[_songPos[songPos][0]][i] == -1) pok.display.print("---");
+        if (_pitch[_songPos[songPos][0]][i] == -1) pok.display.print("---");//pitch
         else{
             pok.display.print(noteLetters[_pitch[_songPos[songPos][0]][i] % 12][0]);
             pok.display.print(noteLetters[_pitch[_songPos[songPos][0]][i] % 12][1]);
             pok.display.print(_pitch[_songPos[songPos][0]][i] / 12);
         }
         pok.display.print(" ");
-        if (_patch[_songPos[songPos][0]][i] == -1) pok.display.print("--");
+        if (_patch[_songPos[songPos][0]][i] == -1) pok.display.print("--");//patch
         else{
+            if (_patch[_songPos[songPos][0]][i] < 10) pok.display.print("0");
             pok.display.print(_patch[_songPos[songPos][0]][i]);
         }
+        pok.display.print(" ");
+        if (_pitch[_songPos[songPos][0]][i] == -1) pok.display.print("--");//ref number
+        else pok.display.print(_pitch[_songPos[songPos][0]][i]);
         pok.display.setCursor(vLines[1] + 2, ((fontH + 1) * (counter + 1)) + 1); // second col
-        if (_pitch[_songPos[songPos][1]][i] == -1) pok.display.print("---");
+        if (_pitch[_songPos[songPos][1]][i] == -1) pok.display.print("---");//pitch
         else{
             pok.display.print(noteLetters[_pitch[_songPos[songPos][1]][i] % 12][0]);
             pok.display.print(noteLetters[_pitch[_songPos[songPos][1]][i] % 12][1]);
             pok.display.print(_pitch[_songPos[songPos][1]][i] / 12);
         }
         pok.display.print(" ");
-        if (_patch[_songPos[songPos][1]][i] == -1) pok.display.print("--");
+        if (_patch[_songPos[songPos][1]][i] == -1) pok.display.print("--");//patch
         else{
+            if (_patch[_songPos[songPos][1]][i] < 10) pok.display.print("0");
             pok.display.print(_patch[_songPos[songPos][1]][i]);
         }
+        pok.display.print(" ");
+        if (_pitch[_songPos[songPos][1]][i] == -1) pok.display.print("--");//ref number
+        else pok.display.print(_pitch[_songPos[songPos][1]][i]);
         pok.display.setCursor(vLines[2] + 2, ((fontH + 1) * (counter + 1)) + 1); // third col
-        if (_pitch[_songPos[songPos][2]][i] == -1) pok.display.print("---");
+        if (_pitch[_songPos[songPos][2]][i] == -1) pok.display.print("---");//pitch
         else{
             pok.display.print(noteLetters[_pitch[_songPos[songPos][2]][i] % 12][0]);
             pok.display.print(noteLetters[_pitch[_songPos[songPos][2]][i] % 12][1]);
             pok.display.print(_pitch[_songPos[songPos][2]][i] / 12);
         }
         pok.display.print(" ");
-        if (_patch[_songPos[songPos][2]][i] == -1) pok.display.print("--");
+        if (_patch[_songPos[songPos][2]][i] == -1) pok.display.print("--");//patch
         else{
+            if (_patch[_songPos[songPos][2]][i] < 10) pok.display.print("0");
             pok.display.print(_patch[_songPos[songPos][2]][i]);
         }
+        pok.display.print(" ");
+        if (_pitch[_songPos[songPos][2]][i] == -1) pok.display.print("--");//ref number
+        else pok.display.print(_pitch[_songPos[songPos][2]][i]);
         counter++;
     }
 }
