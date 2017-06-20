@@ -1,7 +1,9 @@
 #include "Pokitto.h"
 #include "Arrays.h"
 #include "FileIO.h"
+#include "Synth.h"
 Pokitto::Core pok;
+//BLOCK block[30];
 //global variables
 uint8_t screenW = 220, screenH = 176, frameRate = 30, fontW = 5, fontH = 7, screen = 0, buttonRepeatFrame = 2;
 //tracker class
